@@ -1,15 +1,18 @@
 provider "scaleway" {
-  organization = ""
-  token        = ""
-  region       = "par1"
+  organization_id   = "e531300f-9e94-4009-ae22-bf544d07bf16"
+  secret_key        = "127d305b-0a5b-4bdb-8a25-cb9f3f96a572"
+  access_key        = "SCWX8F5BSPSC6JSB1AFC"
+  region            = "fr-par"
+  zone              = "fr-par-1"
 }
 
-resource "scaleway_ip" "ip" {
+resource "scaleway_instance_ip" "ip" {
 }
 
 data "scaleway_image" "ubuntu-bionic" {
-  architecture = "x86_64"
-  name         = "ubuntu-bionic"
+  architecture  = "x86_64"
+  name          = "ubuntu-bionic"
+
 }
 
 resource "scaleway_instance_volume" "data" {
@@ -17,27 +20,26 @@ resource "scaleway_instance_volume" "data" {
   type = "l_ssd"
 }
 
-resource "scaleway_server" "ubuntu-bionic-server" {
-  name  = "ubuntu-bionic-server"
-  public_ip = scaleway_ip.ip.ip
+resource "scaleway_instance_server" "ubuntu-bionic-server" {
+  name  = "dnsinfra-safenetapp"
   image = data.scaleway_image.ubuntu-bionic.id
   type  = "DEV1-S"
 
 }
 
 
-resource "scaleway_security_group" "http" {
+resource "scaleway_instance_security_group" "http" {
   name        = "http"
   description = "allow HTTP and HTTPS traffic"
 }
-resource "scaleway_security_group" "dns" {
+resource "scaleway_instance_security_group" "dns" {
   name        = "dns"
   description = "allow dns traffic"
 }
 
 
 resource "scaleway_security_group_rule" "http_accept" {
-  security_group = scaleway_security_group.http.id
+  security_group = scaleway_instance_security_group.http.id
 
   action    = "accept"
   direction = "inbound"
@@ -47,7 +49,7 @@ resource "scaleway_security_group_rule" "http_accept" {
 }
 
 resource "scaleway_security_group_rule" "https_accept" {
-  security_group = scaleway_security_group.http.id
+  security_group = scaleway_instance_security_group.http.id
 
   action    = "accept"
   direction = "inbound"
@@ -55,8 +57,9 @@ resource "scaleway_security_group_rule" "https_accept" {
   protocol  = "TCP"
   port      = 443
 }
+
 resource "scaleway_security_group_rule" "tcp_dns_accept" {
-  security_group = scaleway_security_group.dns.id
+  security_group = scaleway_instance_security_group.dns.id
 
   action    = "accept"
   direction = "inbound"
@@ -64,8 +67,9 @@ resource "scaleway_security_group_rule" "tcp_dns_accept" {
   protocol  = "TCP"
   port      = 53
 }
+
 resource "scaleway_security_group_rule" "udp_dns_accept" {
-  security_group = scaleway_security_group.dns.id
+  security_group = scaleway_instance_security_group.dns.id
 
   action    = "accept"
   direction = "inbound"
