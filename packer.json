@@ -7,25 +7,37 @@
     {
       "organization_id": "{{ user `organization_id` }}",
       "api_token": "{{ user `api_token` }}",
-      "server_name": "apache",
-      "image_name": "ubuntu-apache",
-      "snapshot_name": "ubuntu-apache-snapshot",
+      "server_name": "dnsinfra",
+      "boottype": "local",
+      "image_name": "ubuntu-bionic",
+      "snapshot_name": "ubuntu-dnsinfra-snapshot",
       "type": "scaleway",
-      "image": "27452e61-310e-4fe5-93af-0a0bdf4c20a6",
+      "image": "f974feac-abae-4365-b988-8ec7d1cec10d",
       "region": "par1",
-      "commercial_type": "START1-S",
-      "ssh_private_key_file": "/Users/myaccount/.ssh/id_rsa",
+      "commercial_type": "DEV1-S",
+      "ssh_private_key_file": "",
       "ssh_username": "root"
     }
   ],
   "provisioners": [
-   {   
+   {
      "type": "shell",
      "inline": [
          "sleep 30",
+         "add-apt-repository ppa:certbot/certbot",
          "apt-get update",
-         "apt-get -y upgrade",
-         "apt-get install -y apache2"
+         "apt-get -yq install apt-utils",
+         "DEBIAN_FRONTEND=noninteractive apt-get -yq upgrade",
+         "echo 'Y' | apt-get -y install sudo",
+         "sudo apt-get -y install nginx",
+         "sudo ufw allow 'Nginx Full'",
+         "sudo ufw allow ssh",
+         "sudo ufw allow 53",
+         "sudo apt-get -y install python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools",
+         "sudo apt-get -y install python3-venv",
+         "pip3 install wheel",
+         "pip3 install uwsgi flask",
+         "sudo apt-get -y install certbot"
      ]   
    }   
  ]
