@@ -1,21 +1,25 @@
-# provider "scaleway" {
-#   organization_id   = "e531300f-9e94-4009-ae22-bf544d07bf16"
-#   secret_key        = "127d305b-0a5b-4bdb-8a25-cb9f3f96a572"
-#   access_key        = "SCWX8F5BSPSC6JSB1AFC"
-#   region            = "fr-par"
-#   zone              = "fr-par-1"
-# }
+variable "organization_id" {
+    type = string
+}
+
+variable "secret_key" {
+    type = string
+}
+
+variable "access_key" {
+    type = string
+}
 
 provider "scaleway" {
-  organization_id   = "{var.SCALEWAY_ORGANIZATION}"
-  secret_key        = "{var.SCALEWAY_API_ACCESS_KEY}"
-  access_key        = "{var.SCALEWAY_API_TOKEN}"
+  organization_id   = var.organization_id
+  secret_key        = var.secret_key
+  access_key        = var.access_key
   region            = "fr-par"
   zone              = "fr-par-1"
 }
 
 
-resource "scaleway_instance_ip" "ip" {
+resource "scaleway_instance_ip" "public_ip" {
 }
 
 data "scaleway_image" "ubuntu-bionic" {
@@ -33,56 +37,36 @@ resource "scaleway_instance_server" "ubuntu-bionic-server" {
   name  = "dnsinfra-safenetapp"
   image = data.scaleway_image.ubuntu-bionic.id
   type  = "DEV1-S"
+  tags = [ "dnsadholes", "safenetapp", "sensely" ]
+  security_group_id = scaleway_instance_security_group.www.id
+  ip_id = scaleway_instance_ip.public_ip.id
 
 }
 
 
-resource "scaleway_instance_security_group" "http" {
-  name        = "http"
-  description = "allow HTTP and HTTPS traffic"
-}
-resource "scaleway_instance_security_group" "dns" {
-  name        = "dns"
-  description = "allow dns traffic"
-}
+resource "scaleway_instance_security_group" "www" {
+  inbound_default_policy  = "drop"
+  outbound_default_policy = "accept"
 
+  inbound_rule {
+    action = "accept"
+    port   = "22"
+    # trying to specigy 0.0.0.0 makes ssh not accept connection
+    # ip     = "0.0.0.0"
+  }
 
-resource "scaleway_security_group_rule" "http_accept" {
-  security_group = scaleway_instance_security_group.http.id
+  inbound_rule {
+    action = "accept"
+    port   = "80"
+  }
 
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 80
-}
+  inbound_rule {
+    action = "accept"
+    port   = "443"
+  }
 
-resource "scaleway_security_group_rule" "https_accept" {
-  security_group = scaleway_instance_security_group.http.id
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 443
-}
-
-resource "scaleway_security_group_rule" "tcp_dns_accept" {
-  security_group = scaleway_instance_security_group.dns.id
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 53
-}
-
-resource "scaleway_security_group_rule" "udp_dns_accept" {
-  security_group = scaleway_instance_security_group.dns.id
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "UDP"
-  port      = 53
+  inbound_rule {
+    action = "accept"
+    port   = "53"
+  }
 }
