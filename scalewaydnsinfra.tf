@@ -1,10 +1,19 @@
+# provider "scaleway" {
+#   organization_id   = "e531300f-9e94-4009-ae22-bf544d07bf16"
+#   secret_key        = "127d305b-0a5b-4bdb-8a25-cb9f3f96a572"
+#   access_key        = "SCWX8F5BSPSC6JSB1AFC"
+#   region            = "fr-par"
+#   zone              = "fr-par-1"
+# }
+
 provider "scaleway" {
-  organization_id   = "e531300f-9e94-4009-ae22-bf544d07bf16"
-  secret_key        = "127d305b-0a5b-4bdb-8a25-cb9f3f96a572"
-  access_key        = "SCWX8F5BSPSC6JSB1AFC"
+  organization_id   = "{var.SCALEWAY_ORGANIZATION}"
+  secret_key        = "{var.SCALEWAY_API_ACCESS_KEY}"
+  access_key        = "{var.SCALEWAY_API_TOKEN}"
   region            = "fr-par"
   zone              = "fr-par-1"
 }
+
 
 resource "scaleway_instance_ip" "ip" {
 }
