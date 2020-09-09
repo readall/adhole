@@ -16,3 +16,6 @@ firewall rules.
 Terraform: For standing up the infra, incremental changes to infra and then teardown when done
 
 Vault: For future use, if we have some complex organization evolving later.
+
+./terraform <apply/destroy> --var-file ./<file>.tfvar
+  
